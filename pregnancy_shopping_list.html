@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>孕期购物清单</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: "Arial", sans-serif;
+                background: linear-gradient(135deg, #ffeef8 0%, #f0f8ff 100%);
+                min-height: 100vh;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .header {
+                background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+                color: white;
+                padding: 30px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .header p {
+                font-size: 1.1em;
+                opacity: 0.9;
+            }
+
+            .controls {
+                padding: 20px 30px;
+                background: #f8f9fa;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            .add-item {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .add-item input {
+                flex: 1;
+                padding: 12px 15px;
+                border: 2px solid #e9ecef;
+                border-radius: 10px;
+                font-size: 16px;
+                transition: border-color 0.3s;
+            }
+
+            .add-item input:focus {
+                outline: none;
+                border-color: #ff9a9e;
+            }
+
+            .btn {
+                padding: 12px 20px;
+                border: none;
+                border-radius: 10px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: all 0.3s;
+                font-weight: bold;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+                color: white;
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
+            }
+
+            .btn-danger {
+                background: linear-gradient(135deg, #ff6b6b 0%, #ffa8a8 100%);
+                color: white;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .btn-danger:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 3px 10px rgba(255, 107, 107, 0.4);
+            }
+
+            .stats {
+                display: flex;
+                justify-content: space-around;
+                text-align: center;
+            }
+
+            .stat-item {
+                padding: 10px;
+            }
+
+            .stat-number {
+                font-size: 2em;
+                font-weight: bold;
+                color: #ff9a9e;
+            }
+
+            .stat-label {
+                color: #666;
+                margin-top: 5px;
+            }
+
+            .content {
+                padding: 30px;
+            }
+
+            .section {
+                margin-bottom: 40px;
+            }
+
+            .section h2 {
+                color: #333;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 3px solid #ff9a9e;
+                display: inline-block;
+            }
+
+            .item-list {
+                display: grid;
+                gap: 15px;
+            }
+
+            .item {
+                background: #f8f9fa;
+                padding: 15px 20px;
+                border-radius: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                transition: all 0.3s;
+                border-left: 5px solid #ff9a9e;
+            }
+
+            .item:hover {
+                transform: translateX(5px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .item.purchased {
+                background: #e8f5e8;
+                border-left-color: #28a745;
+                opacity: 0.8;
+            }
+
+            .item-content {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                flex: 1;
+            }
+
+            .checkbox {
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+                transform: scale(1.2);
+            }
+
+            .item-name {
+                font-size: 16px;
+                color: #333;
+            }
+
+            .item.purchased .item-name {
+                text-decoration: line-through;
+                color: #666;
+            }
+
+            .item-actions {
+                display: flex;
+                gap: 10px;
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 40px;
+                color: #666;
+            }
+
+            .empty-state img {
+                width: 100px;
+                opacity: 0.5;
+                margin-bottom: 20px;
+            }
+
+            @media (max-width: 600px) {
+                .container {
+                    margin: 10px;
+                    border-radius: 15px;
+                }
+
+                .header {
+                    padding: 20px;
+                }
+
+                .header h1 {
+                    font-size: 2em;
+                }
+
+                .content {
+                    padding: 20px;
+                }
+
+                .add-item {
+                    flex-direction: column;
+                }
+
+                .stats {
+                    flex-direction: column;
+                    gap: 10px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🤱 孕期购物清单</h1>
+                <p>记录您的孕期必需品，让准备工作更有条理</p>
+            </div>
+
+            <div class="controls">
+                <div class="add-item">
+                    <input
+                        type="text"
+                        id="newItemInput"
+                        placeholder="输入需要购买的物品..."
+                        maxlength="50"
+                    />
+                    <button class="btn btn-primary" onclick="addItem()">
+                        添加物品
+                    </button>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalItems">0</div>
+                        <div class="stat-label">总物品</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="purchasedItems">0</div>
+                        <div class="stat-label">已购买</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="remainingItems">0</div>
+                        <div class="stat-label">待购买</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="section">
+                    <h2>📋 待购买物品</h2>
+                    <div class="item-list" id="pendingList">
+                        <div class="empty-state">
+                            <p>暂无待购买物品</p>
+                            <small>点击上方添加按钮来添加新物品</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>✅ 已购买物品</h2>
+                    <div class="item-list" id="purchasedList">
+                        <div class="empty-state">
+                            <p>暂无已购买物品</p>
+                            <small>勾选上方物品来标记为已购买</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // 配置：是否使用服务器存储（设为true时需要配置API_BASE_URL）
+            const USE_SERVER_STORAGE = false;
+            const API_BASE_URL = "/api"; // 服务器API基础URL，可根据实际部署调整
+
+            // 默认数据
+            const defaultData = [
+                {
+                    id: 1,
+                    name: "胎帽（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 2,
+                    name: "包单（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 3,
+                    name: "纱布浴巾（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 4,
+                    name: "52码小衣服（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 5,
+                    name: "袜子（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 6,
+                    name: "小方巾（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 7,
+                    name: "奶粉（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 8,
+                    name: "碗+勺子（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 9,
+                    name: "奶瓶（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 10,
+                    name: "奶瓶清洗剂（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 11,
+                    name: "奶瓶刷（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 12,
+                    name: "盆（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 13,
+                    name: "棉柔巾（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 14,
+                    name: "云柔巾（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 15,
+                    name: "湿巾（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 16,
+                    name: "宝宝棉签（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 17,
+                    name: "碘伏棉签（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 18,
+                    name: "护脐贴（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 19,
+                    name: "洗护二合一（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 20,
+                    name: "宝宝面霜（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 21,
+                    name: "护臀膏（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 22,
+                    name: "抚触油（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 23,
+                    name: "隔尿垫（宝宝住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 24,
+                    name: "月子服（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 25,
+                    name: "月子鞋（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 26,
+                    name: "月子帽（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 27,
+                    name: "月子袜（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 28,
+                    name: "一次性内裤（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 29,
+                    name: "哺乳内衣（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 30,
+                    name: "一次性马桶垫（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 31,
+                    name: "洗脸巾（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 32,
+                    name: "产褥垫（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 33,
+                    name: "毛巾（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 34,
+                    name: "私处清洗器（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 35,
+                    name: "储奶袋（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 36,
+                    name: "羊脂膏（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 37,
+                    name: "吸奶器（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 38,
+                    name: "防溢乳垫（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 39,
+                    name: "脸盆（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 40,
+                    name: "衣架（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 41,
+                    name: "漱口水（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 42,
+                    name: "牙膏牙刷（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 43,
+                    name: "护肤品（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 44,
+                    name: "出院衣物（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 45,
+                    name: "疤痕贴（妈妈住院包）",
+                    purchased: false,
+                },
+                {
+                    id: 46,
+                    name: "NB码尿不湿（宝宝产房包）",
+                    purchased: false,
+                },
+                {
+                    id: 47,
+                    name: "52码小衣服（宝宝产房包）",
+                    purchased: false,
+                },
+                {
+                    id: 48,
+                    name: "胎帽+袜（宝宝产房包）",
+                    purchased: false,
+                },
+                {
+                    id: 49,
+                    name: "包被+包巾各1条（宝宝产房包）",
+                    purchased: false,
+                },
+                {
+                    id: 50,
+                    name: "产褥垫（妈妈产房包）",
+                    purchased: false,
+                },
+                {
+                    id: 51,
+                    name: "刀纸（妈妈产房包）",
+                    purchased: false,
+                },
+                {
+                    id: 52,
+                    name: "吸管杯（妈妈产房包）",
+                    purchased: false,
+                },
+                {
+                    id: 53,
+                    name: "胎监带（妈妈产房包）",
+                    purchased: false,
+                },
+                {
+                    id: 54,
+                    name: "一次性内裤（妈妈产房包）",
+                    purchased: false,
+                },
+                {
+                    id: 55,
+                    name: "纸巾+湿巾（妈妈产房包）",
+                    purchased: false,
+                },
+            ];
+
+            // 数据存储
+            let shoppingList = [];
+            let nextId = 1;
+
+            // 从服务器加载数据
+            async function loadFromServer() {
+                try {
+                    const response = await fetch(
+                        `${API_BASE_URL}/shopping-list`,
+                    );
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.items || defaultData;
+                    } else {
+                        console.warn("服务器数据加载失败，使用默认数据");
+                        return defaultData;
+                    }
+                } catch (error) {
+                    console.warn("服务器连接失败，使用默认数据:", error);
+                    return defaultData;
+                }
+            }
+
+            // 保存数据到服务器
+            async function saveToServer(data) {
+                try {
+                    const response = await fetch(
+                        `${API_BASE_URL}/shopping-list`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ items: data }),
+                        },
+                    );
+
+                    if (!response.ok) {
+                        throw new Error("保存失败");
+                    }
+                    return true;
+                } catch (error) {
+                    console.error("服务器保存失败:", error);
+                    alert("数据保存到服务器失败，已保存到本地存储");
+                    return false;
+                }
+            }
+
+            // 统一的数据加载函数
+            async function loadData() {
+                if (USE_SERVER_STORAGE) {
+                    shoppingList = await loadFromServer();
+                } else {
+                    shoppingList =
+                        JSON.parse(
+                            localStorage.getItem("pregnancyShoppingList"),
+                        ) || defaultData;
+                }
+                nextId =
+                    Math.max(...shoppingList.map((item) => item.id), 0) + 1;
+            }
+
+            // 统一的数据保存函数
+            async function saveData() {
+                if (USE_SERVER_STORAGE) {
+                    const success = await saveToServer(shoppingList);
+                    if (!success) {
+                        // 服务器保存失败时，回退到本地存储
+                        localStorage.setItem(
+                            "pregnancyShoppingList",
+                            JSON.stringify(shoppingList),
+                        );
+                    }
+                } else {
+                    localStorage.setItem(
+                        "pregnancyShoppingList",
+                        JSON.stringify(shoppingList),
+                    );
+                }
+            }
+
+            // 验证密码
+            function verifyPassword() {
+                const password = prompt("请输入密码以进行此操作：");
+                return password === "0201";
+            }
+
+            // 添加物品
+            function addItem() {
+                if (!verifyPassword()) {
+                    alert("密码错误，无法添加物品！");
+                    return;
+                }
+
+                const input = document.getElementById("newItemInput");
+                const itemName = input.value.trim();
+
+                if (!itemName) {
+                    alert("请输入物品名称！");
+                    return;
+                }
+
+                if (shoppingList.some((item) => item.name === itemName)) {
+                    alert("该物品已存在！");
+                    return;
+                }
+
+                const newItem = {
+                    id: nextId++,
+                    name: itemName,
+                    purchased: false,
+                };
+
+                shoppingList.push(newItem);
+                input.value = "";
+                saveData();
+                renderLists();
+            }
+
+            // 删除物品
+            function deleteItem(id) {
+                if (!verifyPassword()) {
+                    alert("密码错误，无法删除物品！");
+                    return;
+                }
+
+                if (confirm("确定要删除这个物品吗？")) {
+                    shoppingList = shoppingList.filter(
+                        (item) => item.id !== id,
+                    );
+                    saveData();
+                    renderLists();
+                }
+            }
+
+            // 切换购买状态
+            function togglePurchased(id) {
+                const item = shoppingList.find((item) => item.id === id);
+                if (item) {
+                    item.purchased = !item.purchased;
+                    saveData();
+                    renderLists();
+                }
+            }
+
+            // 渲染列表
+            function renderLists() {
+                const pendingList = document.getElementById("pendingList");
+                const purchasedList = document.getElementById("purchasedList");
+
+                const pendingItems = shoppingList.filter(
+                    (item) => !item.purchased,
+                );
+                const purchasedItems = shoppingList.filter(
+                    (item) => item.purchased,
+                );
+
+                // 渲染待购买列表
+                if (pendingItems.length === 0) {
+                    pendingList.innerHTML = `
+                    <div class="empty-state">
+                        <p>🎉 太棒了！所有物品都已购买</p>
+                        <small>点击上方添加按钮来添加新物品</small>
+                    </div>
+                `;
+                } else {
+                    pendingList.innerHTML = pendingItems
+                        .map(
+                            (item) => `
+                    <div class="item">
+                        <div class="item-content">
+                            <input type="checkbox" class="checkbox"
+                                   onchange="togglePurchased(${item.id})"
+                                   ${item.purchased ? "checked" : ""}>
+                            <span class="item-name">${item.name}</span>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn btn-danger" onclick="deleteItem(${item.id})">删除</button>
+                        </div>
+                    </div>
+                `,
+                        )
+                        .join("");
+                }
+
+                // 渲染已购买列表
+                if (purchasedItems.length === 0) {
+                    purchasedList.innerHTML = `
+                    <div class="empty-state">
+                        <p>暂无已购买物品</p>
+                        <small>勾选上方物品来标记为已购买</small>
+                    </div>
+                `;
+                } else {
+                    purchasedList.innerHTML = purchasedItems
+                        .map(
+                            (item) => `
+                    <div class="item purchased">
+                        <div class="item-content">
+                            <input type="checkbox" class="checkbox"
+                                   onchange="togglePurchased(${item.id})"
+                                   ${item.purchased ? "checked" : ""}>
+                            <span class="item-name">${item.name}</span>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn btn-danger" onclick="deleteItem(${item.id})">删除</button>
+                        </div>
+                    </div>
+                `,
+                        )
+                        .join("");
+                }
+
+                updateStats();
+            }
+
+            // 更新统计信息
+            function updateStats() {
+                const total = shoppingList.length;
+                const purchased = shoppingList.filter(
+                    (item) => item.purchased,
+                ).length;
+                const remaining = total - purchased;
+
+                document.getElementById("totalItems").textContent = total;
+                document.getElementById("purchasedItems").textContent =
+                    purchased;
+                document.getElementById("remainingItems").textContent =
+                    remaining;
+            }
+
+            // 回车键添加物品
+            document
+                .getElementById("newItemInput")
+                .addEventListener("keypress", function (e) {
+                    if (e.key === "Enter") {
+                        addItem();
+                    }
+                });
+
+            // 初始化页面
+            document.addEventListener("DOMContentLoaded", async function () {
+                // 显示加载状态
+                document.getElementById("pendingList").innerHTML =
+                    '<div class="empty-state"><p>⏳ 正在加载数据...</p></div>';
+                document.getElementById("purchasedList").innerHTML =
+                    '<div class="empty-state"><p>⏳ 正在加载数据...</p></div>';
+
+                // 加载数据并渲染
+                await loadData();
+                renderLists();
+            });
+        </script>
+    </body>
+</html>
